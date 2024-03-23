@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, getDocs } from "firebase/firestore";
 
 // TODO: Replace the following with your app's Firebase project configuration
 // See: https://support.google.com/firebase/answer/7015592
@@ -30,21 +30,28 @@ const db = getFirestore(app);
 function SearchBar(){
     const {register, handleSubmit, reset} = useForm();
     const [buses, setBuses] = useState([]);
-
+    
     const onSubmit = async (data) =>{
-        console.log(data);
+        // console.log(data);
+        const dateObject = new Date(data.date);
+        const userDay = dateObject.getDay();
+        console.log("userDay: ",userDay);
         const q = query(collection(db, "busDetails"));
         let fetchBuses = []
         const querySnapshot = await getDocs(q);
             querySnapshot.forEach((doc) => {
                 const docData = doc.data();
-                if(docData.source === data.from && docData.destination === data.to){
+                if(docData.source === data.from && docData.destination === data.to && dayFind(userDay, docData)){
                     fetchBuses.push(docData);
+                    console.log(dayFind(userDay, docData));
                 }
             // doc.data() is never undefined for query doc snapshots
            setBuses(fetchBuses);
         });
-        console.log("fetchBuses: ", fetchBuses);
+        // const dateObject = new Date(data.date);
+        // const day = dateObject.getDate();
+        // console.log("Day: ", day);
+        // console.log("fetchBuses: ", fetchBuses);
         // Add your logic here to handle the search
     }
 
@@ -71,9 +78,33 @@ function SearchBar(){
                     {/* Add more details as needed */}
                 </div>
             ))}
-
         </div>
     )
+}
+
+
+const dayFind = (day, docData) => {
+    if (day === 0){
+        return docData.Sunday;
+    }
+    if (day === 1){
+        return docData.Monday;
+    }
+    if (day === 2){
+        return docData.Tuesday;
+    }
+    if (day === 3){
+        return docData.Wednesday;
+    }
+    if (day === 4){
+        return docData.Thursday;
+    }
+    if (day === 5){
+        return docData.Friday;
+    }
+    if (day === 6){
+        return docData.Saturday;
+    }
 }
 
 export default SearchBar;
